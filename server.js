@@ -1,9 +1,12 @@
-const express = require('express');
+// set up server shiz
+const app = require('express')();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+
 const mongoose = require('mongoose');
 
 const routes = require('./routes');
 
-const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
@@ -16,4 +19,4 @@ if (process.env.NODE_ENV === 'production') {
 app.use(routes);
 
 
-app.listen(PORT);
+http.listen(PORT, () => console.log(`connected on http://localhost:${PORT}`));
