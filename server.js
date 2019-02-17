@@ -6,6 +6,7 @@ const session = require('express-session');
 const logger = require('morgan');
 const mongoose = require('mongoose');
 const passport = require('./utils/middleware/passport-auth');
+require('dotenv').config();
 
 const routes = require('./routes');
 
@@ -38,6 +39,6 @@ if (process.env.NODE_ENV === 'production') {
 app.use(routes);
 
 // Connect to the Mongo DB
-mongoose.connect('mongodb://localhost/lanterns', { useNewUrlParser: true });
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 
 http.listen(PORT, () => console.log(`connected on http://localhost:${PORT}`));
