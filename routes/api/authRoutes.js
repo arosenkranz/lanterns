@@ -4,7 +4,6 @@ const passport = require('../../utils/middleware/passport-auth');
 
 // match /api/auth
 router.get('/', passport.authenticate('auth0'), (req, res) => {
-  console.log(req.user);
   res.redirect('/');
 });
 
@@ -13,7 +12,7 @@ router.get('/callback', passport.authenticate('auth0', { failureRedirect: '/logi
   if (!req.user) {
     throw new Error('user null');
   }
-  res.redirect('/');
+  res.redirect('http://localhost:3000');
 });
 
 module.exports = router;

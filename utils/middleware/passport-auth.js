@@ -8,6 +8,7 @@ const strategy = new Auth0Strategy(
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
     callbackURL: process.env.AUTH0_CALLBACK_URL || 'http://localhost:3001/api/auth/callback',
+    scope: 'openid profile',
   },
   // accessToken is the token to call Auth0 API (not needed in the most cases)
   // extraParams.id_token has the JSON Web Token
