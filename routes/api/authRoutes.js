@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const passport = require('../../utils/middleware/passport-auth');
-// const db = require('../../models');
+const db = require('../../models');
+const promiseHandler = require('../../utils/promiseHandler');
 
 // match /api/auth
 router.get('/', passport.authenticate('auth0'), (req, res) => {
@@ -8,11 +9,43 @@ router.get('/', passport.authenticate('auth0'), (req, res) => {
 });
 
 // match /api/auth/callback
-router.get('/callback', passport.authenticate('auth0', { failureRedirect: '/login' }), (req, res) => {
-  if (!req.user) {
-    throw new Error('user null');
-  }
-  res.redirect('http://localhost:3000');
-});
+router.get(
+  '/callback',
+  passport.authenticate('auth0', { failureRedirect: '/login' }),
+  async (req, res) => {
+    if (!req.user) {
+      throw new Error('user null');
+    }
+    /*
+    req.user.displayName
+    req.user.picture
+    req.user.user_id
+  */
+    console.log(req.user);
+
+    const [err, dbUser] = await promiseHandler(
+      db.Users.findOneAndUpdate(
+        {
+          user_id: req.user.user_id,
+        },
+        {
+          user_id: req.user.user_id,
+          picture: req.user.picture,
+          displayName: req.user.displayName,
+        },
+        {
+          upsert: true,
+          new: true,
+        },
+      ),
+    );
+
+    if (err) {
+      console.log(err);
+    }
+    console.log(dbUser);
+    res.redirect('http://localhost:3000');
+  },
+);
 
 module.exports = router;

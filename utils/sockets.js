@@ -5,9 +5,5 @@ module.exports = (io) => {
     socket.on('disconnect', () => {
       console.log('user disconnected');
     });
-
-    socket.on('new-lantern', (message) => {
-      console.log(message);
-    });
   });
 };

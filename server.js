@@ -1,5 +1,6 @@
 // set up server shiz
 const express = require('express');
+
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
@@ -16,6 +17,9 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(logger('dev'));
+
+// set socket to be available with every request
+app.set('socketio', io);
 
 // config express-session
 const sess = {
@@ -37,9 +41,13 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static('client/build'));
 }
 
+// turn on routes and sockets
 app.use(routes);
+require('./utils/sockets')(io);
+
 
 // Connect to the Mongo DB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 
+// turn on server
 http.listen(PORT, () => console.log(`connected on http://localhost:${PORT}`));
