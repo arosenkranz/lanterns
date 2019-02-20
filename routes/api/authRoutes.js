@@ -8,6 +8,13 @@ router.get('/', passport.authenticate('auth0'), (req, res) => {
   res.redirect('/');
 });
 
+router.get('/check', (req, res) => {
+  if (req.user) {
+    return res.json({ ...req.user, status: true });
+  }
+  return res.json({ status: false });
+});
+
 // match /api/auth/callback
 router.get(
   '/callback',
