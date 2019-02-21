@@ -15,21 +15,19 @@ class SendLantern extends Component {
     //     isMobile: false
     //   });
     // }
-    console.log(Promise.resolve(checkLogin) == checkLogin);
-    checkLogin
+    checkLogin()
       .then(({ data }) => {
         console.log(data);
-        if (data.success) {
+        if (data.status) {
           this.setState({
             userData: data
           });
         }
-      })
-      .catch(err => {
-        console.log(err);
-        this.setState({
-          isLoggedIn: false
-        });
+        else {
+          this.setState({
+            isLoggedIn:false
+          })
+        }
       });
   }
 
@@ -37,7 +35,7 @@ class SendLantern extends Component {
     if (!this.state.isMobile) {
       return <Redirect to="/" />;
     } else if (!this.state.isLoggedIn) {
-      return <Redirect to="http://localhost:3001/api/auth" />;
+      return <Redirect to="/sign-in" />;
     }
   };
 
@@ -66,7 +64,11 @@ class SendLantern extends Component {
   };
 
   render() {
-    this.checkPage();
+    if (!this.state.isMobile) {
+      return <Redirect to="/" />;
+    } else if (!this.state.isLoggedIn) {
+      return <Redirect to="/sign-in" />;
+    }
 
     const {
       state: { message },

@@ -10,6 +10,7 @@ router.get('/', passport.authenticate('auth0'), (req, res) => {
 
 router.get('/check', (req, res) => {
   if (req.user) {
+    console.log({ ...req.user, status: true });
     return res.json({ ...req.user, status: true });
   }
   return res.json({ status: false });
@@ -51,7 +52,7 @@ router.get(
       console.log(err);
     }
     console.log(dbUser);
-    res.redirect('http://localhost:3000');
+    res.redirect('http://localhost:3000/send');
   },
 );
 

@@ -26,7 +26,7 @@ module.exports = {
     // get io
     const io = req.app.get('socketio');
 
-    const [messageErr, dbMessage] = await promiseHandler(db.Messages.insert(req.body));
+    const [messageErr, dbMessage] = await promiseHandler(db.Messages.create(req.body));
 
     if (messageErr) {
       console.log(messageErr);
