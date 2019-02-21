@@ -3,13 +3,13 @@ const promiseHandler = require('../utils/promiseHandler');
 
 module.exports = {
   async findAll(req, res) {
-    const [err, dbUsers] = await promiseHandler(db.Users.findAll().populate('messsages'));
+    const [err, dbMessages] = await promiseHandler(db.Messages.findAll());
 
     if (err) {
       console.log(err);
       return res.json(err);
     }
-    res.json(dbUsers);
+    return res.json(dbMessages);
   },
   async findUser(req, res) {
     const [err, dbUser] = await promiseHandler(
@@ -20,13 +20,15 @@ module.exports = {
       console.log(err);
       return res.json(err);
     }
-    res.json(dbUser);
+    return res.json(dbUser);
   },
   async create(req, res) {
     // get io
     const io = req.app.get('socketio');
 
-    const [messageErr, dbMessage] = await promiseHandler(db.Messages.create(req.body));
+    const [messageErr, dbMessage] = await promiseHandler(
+      db.Messages.create({ message: req.body.message, displayName: req.user.displayName }),
+    );
 
     if (messageErr) {
       console.log(messageErr);
@@ -50,7 +52,7 @@ module.exports = {
 
     console.log(dbUser);
 
-    io.emit('new lantern', { ...dbMessage, ...dbUser });
-    res.json({ ...dbMessage, ...dbUser });
+    io.emit('new lantern', dbMessage);
+    return res.json(dbMessage);
   },
 };

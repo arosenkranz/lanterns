@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { createLantern, checkLogin, promiseHandler } from '../../utils/API';
-console.log(createLantern);
+
 class SendLantern extends Component {
   state = {
     isMobile: true,
@@ -10,6 +10,7 @@ class SendLantern extends Component {
   };
 
   componentDidMount() {
+
     // if (!/Mobi|Android/i.test(navigator.userAgent)) {
     //   return this.setState({
     //     isMobile: false
@@ -77,7 +78,7 @@ class SendLantern extends Component {
     } = this;
 
     return (
-      <div>
+      <div className='container'>
         <form onSubmit={handleFormSubmit}>
           <textarea value={message} onChange={handleInputChange} name="message" placeholder="Message Here" />
           <button onClick={handleFormSubmit}>Submit Form</button>

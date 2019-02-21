@@ -4,6 +4,9 @@ const Filter = require('bad-words');
 const filter = new Filter();
 
 const messageSchema = mongoose.Schema({
+  displayName: {
+    type: String,
+  },
   message: {
     type: String,
     min: 1,
