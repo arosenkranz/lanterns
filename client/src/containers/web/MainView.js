@@ -4,13 +4,15 @@ import { getLanterns, promiseHandler } from '../../utils/API';
 import io from 'socket.io-client';
 import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
+import random from 'canvas-sketch-util/random';
 
 const socket = io('http://localhost:3001');
 
 class MainView extends Component {
   state = {
     isMobile: false,
-    lanterns: []
+    lanterns: [],
+    meshes: []
   };
 
   componentDidMount() {
@@ -44,46 +46,32 @@ class MainView extends Component {
 
   initThreeScene = () => {
     console.log(this.mount);
-    const width = this.mount.clientWidth;
-    const height = this.mount.clientHeight;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
     console.log(width, height);
     //ADD SCENE
     this.scene = new THREE.Scene();
 
-    //ADD CAMERA
-    this.camera = new THREE.OrthographicCamera();
-    // Setup an isometric perspective
-    const aspect = width / height;
-    const zoom = 1.85;
-    this.camera.left = -zoom * aspect;
-    this.camera.right = zoom * aspect;
-    this.camera.top = zoom;
-    this.camera.bottom = -zoom;
-    this.camera.near = -100;
-    this.camera.far = 100;
-    this.camera.position.set(zoom, zoom, zoom);
-    this.camera.lookAt(new THREE.Vector3());
-
-    // Update camera properties
-    this.camera.updateProjectionMatrix();
+    this.camera = new THREE.PerspectiveCamera(40, width / height, .1, 1000);
+    this.camera.position.set(0, .5, 9);
+    this.camera.lookAt(this.scene.position);
 
     //ADD RENDERER
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setClearColor('#000000');
+    this.renderer.setClearColor(0x140b33, 1);    
     this.renderer.setSize(width, height);
     this.mount.appendChild(this.renderer.domElement);
 
     //ADD CUBE
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshStandardMaterial({
+    this.geometry = new THREE.BoxGeometry(.2, .2, 1);
+    this.material = new THREE.MeshStandardMaterial({
       metalness: 0,
-      roughness: 0.4,
+      roughness: 1,
       color: '#ba8f44'
     });
-    this.cube = new THREE.Mesh(geometry, material);
-    this.cube.position.set(-1, -1.5, 0);
-
-    this.scene.add(this.cube);
+    
+    // for perspective
+    this.scene.add(new THREE.GridHelper(15, 20));
 
     const light = new THREE.DirectionalLight('white', 1);
     light.position.set(2, 0, 2);
@@ -92,8 +80,43 @@ class MainView extends Component {
     const ambientlight = new THREE.AmbientLight(0x404040);
     this.scene.add(ambientlight);
 
+    this.createLantern();
+    this.createLantern();
+    this.createLantern();
+
     this.start();
   };
+
+  // create new lantern
+  createLantern = () => {
+
+    const cube = new THREE.Mesh(this.geometry, this.material);
+    cube.position.set(
+      random.range(-3.5, 3.5), 
+      -10, 
+      random.range(-6, 9)
+    );
+    console.log(cube);
+
+    const position = cube.position;
+    const target = {x: cube.position.x, y: 5, z: cube.position.z};
+
+    const tween = new TWEEN.Tween(position).to(target, 10000);
+
+    tween.onUpdate(function () {
+      cube.position.x = position.x;
+      cube.position.y = position.y;
+    });
+
+    tween.repeat(Infinity);
+
+    this.scene.add(cube);
+    tween.start();
+
+    this.setState({
+      meshes: [...this.state.meshes, cube]
+    })
+  }
 
   start = () => {
     if (!this.frameId) {
@@ -106,11 +129,12 @@ class MainView extends Component {
   };
 
   animate = () => {
-    this.cube.rotation.x += 0.01;
-    this.cube.rotation.y += 0.01;
+    // this.cube.rotation.x += 0.01;
+    // this.cube.rotation.y += 0.01;
 
     this.renderScene();
     this.frameId = window.requestAnimationFrame(this.animate);
+    TWEEN.update();
   };
 
   renderScene = () => {
