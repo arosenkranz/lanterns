@@ -80,15 +80,24 @@ class MainView extends Component {
     const ambientlight = new THREE.AmbientLight(0x404040);
     this.scene.add(ambientlight);
 
-    this.createLantern();
-    this.createLantern();
-    this.createLantern();
+    var spotLight = new THREE.SpotLight();
+    spotLight.position.set(0, 80, 30);
+    spotLight.castShadow = true;
+    this.scene.add(spotLight);
+
+    this.createLantern({name: "one"});
+    this.createLantern({name: "two"});
+    this.createLantern({name: "three"});
 
     this.start();
   };
 
   // create new lantern
-  createLantern = () => {
+  createLantern = (lanternInfo) => {
+
+    const parent = new THREE.Object3D();
+    parent.name = lanternInfo.name;
+    this.scene.add(parent);
 
     const cube = new THREE.Mesh(this.geometry, this.material);
     cube.position.set(
@@ -97,6 +106,8 @@ class MainView extends Component {
       random.range(-6, 9)
     );
     console.log(cube);
+    cube.castShadow = true;
+    cube.receiveShadow = true;
 
     const position = cube.position;
     const target = {x: cube.position.x, y: 5, z: cube.position.z};
@@ -110,7 +121,7 @@ class MainView extends Component {
 
     tween.repeat(Infinity);
 
-    this.scene.add(cube);
+    parent.add(cube);
     tween.start();
 
     this.setState({
@@ -158,6 +169,13 @@ class MainView extends Component {
     if (this.state.isMobile) {
       return <Redirect to="/send" />;
     }
+
+   /*  setInterval(() => {
+      const cube = this.scene.getObjectByName("one");
+      
+      console.log(cube);
+    }, 5000); */
+
     return (
       <div
         style={{ minWidth: '100vh', minHeight: '100vh' }}
