@@ -5,6 +5,7 @@ import io from 'socket.io-client';
 import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import random from 'canvas-sketch-util/random';
+import {lerp, pingPong, inverseLerp} from 'canvas-sketch-util/math';
 
 const socket = io('http://localhost:3001');
 
@@ -45,6 +46,9 @@ class MainView extends Component {
   };
 
   initThreeScene = () => {
+    this.meshes = [];
+    this.time = 0;
+
     console.log(this.mount);
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -52,24 +56,24 @@ class MainView extends Component {
     //ADD SCENE
     this.scene = new THREE.Scene();
 
-    this.camera = new THREE.PerspectiveCamera(40, width / height, .1, 1000);
-    this.camera.position.set(0, .5, 9);
+    this.camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
+    this.camera.position.set(0, 0.5, 9);
     this.camera.lookAt(this.scene.position);
 
     //ADD RENDERER
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setClearColor(0x140b33, 1);    
+    this.renderer.setClearColor(0x140b33, 1);
     this.renderer.setSize(width, height);
     this.mount.appendChild(this.renderer.domElement);
 
     //ADD CUBE
-    this.geometry = new THREE.BoxGeometry(.2, .2, 1);
+    this.geometry = new THREE.BoxGeometry(0.2, 0.2, 1);
     this.material = new THREE.MeshStandardMaterial({
       metalness: 0,
       roughness: 1,
       color: '#ba8f44'
     });
-    
+
     // for perspective
     this.scene.add(new THREE.GridHelper(15, 20));
 
@@ -85,37 +89,37 @@ class MainView extends Component {
     spotLight.castShadow = true;
     this.scene.add(spotLight);
 
-    this.createLantern({name: "one"});
-    this.createLantern({name: "two"});
-    this.createLantern({name: "three"});
+    this.createLantern({ name: 'one' });
+    this.createLantern({ name: 'two' });
+    this.createLantern({ name: 'three' });
 
     this.start();
   };
 
   // create new lantern
-  createLantern = (lanternInfo) => {
-
+  createLantern = lanternInfo => {
     const parent = new THREE.Object3D();
     parent.name = lanternInfo.name;
     this.scene.add(parent);
 
     const cube = new THREE.Mesh(this.geometry, this.material);
-    cube.position.set(
-      random.range(-3.5, 3.5), 
-      -10, 
-      random.range(-6, 9)
-    );
+    cube.position.set(random.range(-3.5, 3.5), -10, random.range(-6, 9));
     console.log(cube);
     cube.castShadow = true;
     cube.receiveShadow = true;
 
+    cube.originalPosition = cube.position.clone();
+
     const position = cube.position;
-    const target = {x: cube.position.x, y: 5, z: cube.position.z};
+    const target = { x: cube.position.x, y: 5, z: cube.position.z };
 
     const tween = new TWEEN.Tween(position).to(target, 10000);
 
-    tween.onUpdate(function () {
-      cube.position.x = position.x;
+    const randomNum = Math.random();
+    tween.onUpdate(function() {
+      cube.rotation.z = lerp(-10.25, 10.25, Math.random());
+
+      // cube.position.x = position.x;
       cube.position.y = position.y;
     });
 
@@ -124,10 +128,8 @@ class MainView extends Component {
     parent.add(cube);
     tween.start();
 
-    this.setState({
-      meshes: [...this.state.meshes, cube]
-    })
-  }
+    this.meshes.push(cube);
+  };
 
   start = () => {
     if (!this.frameId) {
@@ -142,7 +144,7 @@ class MainView extends Component {
   animate = () => {
     // this.cube.rotation.x += 0.01;
     // this.cube.rotation.y += 0.01;
-
+    this.time += 1;
     this.renderScene();
     this.frameId = window.requestAnimationFrame(this.animate);
     TWEEN.update();
@@ -150,6 +152,10 @@ class MainView extends Component {
 
   renderScene = () => {
     this.renderer.render(this.scene, this.camera);
+    /* if (this.selectedCube) {
+      console.log(this.camera);
+      this.camera.target.position.copy(this.selectedCube.position);
+    } */
   };
 
   getLanterns = async () => {
@@ -162,19 +168,16 @@ class MainView extends Component {
     });
   };
 
-  
-
   render() {
-
     if (this.state.isMobile) {
       return <Redirect to="/send" />;
     }
 
-   /*  setInterval(() => {
-      const cube = this.scene.getObjectByName("one");
-      
-      console.log(cube);
-    }, 5000); */
+    setTimeout(() => {
+      this.selectedCube = this.scene.getObjectByName('one');
+
+      console.log(this.selectedCube);
+    }, 5000);
 
     return (
       <div
