@@ -8187,6 +8187,10 @@ three-orbit-controls@^82.1.0:
   version "82.1.0"
   resolved "https://registry.yarnpkg.com/three-orbit-controls/-/three-orbit-controls-82.1.0.tgz#11a7f33d0a20ecec98f098b37780f6537374fab4"
 
+three-text2d@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/three-text2d/-/three-text2d-0.5.0.tgz#fb395b58f9aec98766740536068ab3c42e9be3c4"
+
 three@^0.101.1:
   version "0.101.1"
   resolved "https://registry.yarnpkg.com/three/-/three-0.101.1.tgz#e7681ef52f4e572cb84f307f16f540c457030ec6"
