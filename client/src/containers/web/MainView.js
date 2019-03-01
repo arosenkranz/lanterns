@@ -60,11 +60,37 @@ class MainView extends Component {
     });
   };
 
+  pickLantern = () => {
+    setTimeout(() => {
+      this.selectedCube = this.scene.getObjectByName('one');
+
+      console.log(this.selectedCube);
+
+      new TWEEN.Tween(this.camera.position)
+        .to(
+          { z: this.selectedCube.children[0].position.z + 0.5, x: this.selectedCube.children[0].position.x + 2 },
+          8000
+        )
+        .onUpdate(() => {
+          this.camera.lookAt(this.selectedCube.children[0].position);
+        })
+        .onComplete(() => {
+          this.cameraFocused = true;
+        })
+        .start();
+    }, 5000);
+  };
+
   initThreeScene = () => {
     this.meshes = [];
     this.time = 0;
     this.mesh = '';
+    this.center = new THREE.Vector3(0, 0, 0);
     this.THREE = THREE;
+    this.cameraFocused = false;
+    this.selectedCube = '';
+
+    this.pickLantern();
 
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -84,7 +110,7 @@ class MainView extends Component {
     this.material = new THREE.MeshStandardMaterial({
       // map: this.logo,
       opacity: 1,
-      roughness: 1,
+      roughness: 0.5,
       transparent: false,
       metalness: 0,
       emissive: '#C9AF5B',
@@ -108,13 +134,13 @@ class MainView extends Component {
     // for perspective
     this.scene.add(new THREE.GridHelper(15, 20));
 
-    const light = new THREE.DirectionalLight('#dbcdea', 1);
+    const light = new THREE.DirectionalLight('red', 1);
     light.position.set(2, 0, 2);
     this.scene.add(light);
 
     const ambientlight = new THREE.AmbientLight(0x404040);
     this.scene.add(ambientlight);
-    
+
     const spotLight = new THREE.SpotLight();
     spotLight.position.set(0, 80, 30);
     spotLight.castShadow = true;
@@ -143,10 +169,10 @@ class MainView extends Component {
     lantern.originalPosition = lantern.position.clone();
 
     const position = lantern.position;
-    const target = { x: lantern.position.x, y: 5, z: lantern.position.z };
-    const tween = new TWEEN.Tween(position).to(target, 30000);
+    this.target = { x: lantern.position.x, y: 5, z: lantern.position.z };
+    const tween = new TWEEN.Tween(position).to(this.target, 30000);
 
-    const zRotation = this.toRadians(random.range(10, 75));
+    const zRotation = this.toRadians(random.range(5, 45));
     const tweenTimer = random.rangeFloor(4000, 10000);
     const tween2 = new TWEEN.Tween(lantern.rotation)
       .to({ z: '-' + zRotation }, tweenTimer)
@@ -161,14 +187,14 @@ class MainView extends Component {
 
     const randomNum = Math.random();
     tween.onUpdate(function() {
-      lantern.rotation.x += 0.009;
-      lantern.rotation.y += 0.002;
-      if (lantern.position.y >= 45) {
-        lantern.position.y = position.y;
+      lantern.rotation.x += 0.0008;
+      lantern.rotation.y += 0.005;
+      if (lantern.position.y >= 10) {
+        lantern.position.y = -10;
       }
     });
 
-    // tween.repeat(Infinity);
+    tween.repeat(Infinity);
     // tween2.repeat(Infinity);
 
     parent.add(lantern);
@@ -198,10 +224,20 @@ class MainView extends Component {
 
   renderScene = () => {
     this.renderer.render(this.scene, this.camera);
-    /* if (this.selectedCube) {
-      console.log(this.camera);
-      this.camera.target.position.copy(this.selectedCube.position);
-    } */
+    if (this.selectedCube) {
+      if (this.cameraFocused) {
+        this.camera.lookAt(this.selectedCube.children[0].position);
+
+      }
+      if (this.selectedCube.children[0].position.y >= this.camera.position.y) {
+        this.camera.position.y = this.selectedCube.children[0].position.y;
+      }
+      if (this.selectedCube.children[0].position.y >= 4) {
+        this.selectedCube = null;
+        new TWEEN.Tween(this.camera.rotation).to({ x: 0, y: 0, z: 0 }, 6000).start();
+        new TWEEN.Tween(this.camera.position).to({ x: 0, y: 0.5, z: 9 }, 6000).start();
+      }
+    }
   };
 
   getLanterns = async () => {
@@ -218,12 +254,6 @@ class MainView extends Component {
     if (this.state.isMobile) {
       return <Redirect to="/send" />;
     }
-
-    setTimeout(() => {
-      this.selectedCube = this.scene.getObjectByName('one');
-
-      console.log(this.selectedCube);
-    }, 5000);
 
     return (
       <div
