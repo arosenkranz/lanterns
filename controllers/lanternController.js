@@ -3,7 +3,7 @@ const promiseHandler = require('../utils/promiseHandler');
 
 module.exports = {
   async findAll(req, res) {
-    const [err, dbMessages] = await promiseHandler(db.Messages.findAll());
+    const [err, dbMessages] = await promiseHandler(db.Messages.find());
 
     if (err) {
       console.log(err);
@@ -13,7 +13,7 @@ module.exports = {
   },
   async findUser(req, res) {
     const [err, dbUser] = await promiseHandler(
-      db.Users.findAll({ user_id: req.user.user_id }).populate('messsages'),
+      db.Users.find({ user_id: req.user.user_id }).populate('messsages'),
     );
 
     if (err) {

@@ -190,3 +190,12 @@ p {
   font-weight: 700;
   margin: 0;
 }
+
+.header-CTA {
+  position: fixed;
+  z-index: 9999;
+  color: var(--tan);
+  padding: 10px;
+  text-align: center;
+  width: 100%;
+}
