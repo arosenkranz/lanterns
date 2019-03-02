@@ -16,7 +16,7 @@ const App = () => {
             exact
             path="/sign-in"
             component={() => {
-              window.location = process.env.SIGNIN;
+              window.location = 'https://lanterns-tv.herokuapp.com/api/auth';
               return null;
             }}
           />

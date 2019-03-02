@@ -12,7 +12,7 @@ OBJLoader(THREE);
 
 // const OrbitControls = require('three-orbit-controls')(THREE);
 
-const socket = io(process.env.SOCKETURL);
+const socket = io('https://lanterns-tv.herokuapp.com');
 
 const styles = {
   position: 'absolute',
