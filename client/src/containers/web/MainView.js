@@ -6,11 +6,11 @@ import * as THREE from 'three';
 import { SpriteText2D, textAlign } from 'three-text2d';
 import * as TWEEN from '@tweenjs/tween.js';
 import random from 'canvas-sketch-util/random';
-import { lerp, pingPong, inverseLerp } from 'canvas-sketch-util/math';
+// import { lerp, pingPong, inverseLerp } from 'canvas-sketch-util/math';
 import * as OBJLoader from 'three-obj-loader';
 OBJLoader(THREE);
 
-const OrbitControls = require('three-orbit-controls')(THREE);
+// const OrbitControls = require('three-orbit-controls')(THREE);
 
 const socket = io('http://localhost:3001');
 
@@ -55,6 +55,7 @@ class MainView extends Component {
     socket.on('connect', () => {
       socket.on('new lantern', data => {
         console.log(data);
+        this.createLantern(data);
         const lanterns = [...this.state.lanterns, data];
         this.setState({ lanterns });
       });
@@ -62,53 +63,51 @@ class MainView extends Component {
   };
 
   pickLantern = () => {
-
     if (this.selectedLantern) {
       console.log('lantern active already');
-      return false;
+      return setTimeout(this.pickLantern, 5000);
     }
 
-    setTimeout(() => {
-      const lanternName = this.meshes[Math.floor(Math.random() * this.meshes.length)];
-      this.selectedLantern = this.scene.getObjectByName(lanternName).children[0];
-      
-      while (this.selectedLantern.position.y >= 0) {
-        const lanternName = this.meshes[Math.floor(Math.random() * this.meshes.length)];
-        this.selectedLantern = this.scene.getObjectByName(lanternName).children[0];
-      }
+    let lanternName = this.meshes[Math.floor(Math.random() * this.meshes.length)];
+    this.selectedLantern = this.scene.getObjectByName(lanternName);
 
-      console.log(this.selectedLantern);
+    if (!this.selectedLantern || this.selectedLantern.position.y >= 10) {
+      return setTimeout(this.pickLantern, 5000);
+    }
+    this.displayLantern();
+  };
 
-      const easing = TWEEN.Easing.Linear.None;
+  displayLantern = () => {
+    console.log(this.selectedLantern);
 
-      new TWEEN.Tween(this.camera.position)
-        .to(
-          { z: this.selectedLantern.position.z + 0.5, x: this.selectedLantern.position.x + 2 },
-          8000
-        )
-        .easing(easing)
-        .onUpdate(() => {
-          this.camera.lookAt(this.selectedLantern.position);
-        })
-        .onComplete(() => {
-          this.cameraFocused = true;
-          setTimeout(() => {
-            this.selectedLantern = null;
-            new TWEEN.Tween(this.camera.rotation)
-              .to({ x: 0, y: 0, z: 0 }, 6000)
-              .easing(easing)
-              .start();
-            new TWEEN.Tween(this.camera.position)
-              .to({ x: 0, y: 0.5, z: 9 }, 6000)
-              .easing(easing)
-              .onComplete(() => {
-                setTimeout(this.pickLantern, 30000);
-              })
-              .start();
-          }, 15000);
-        })
-        .start();
-    }, 5000);
+    const easing = TWEEN.Easing.Linear.None;
+
+    new TWEEN.Tween(this.camera.position)
+      .to({ z: this.selectedLantern.position.z + 1.5, x: this.selectedLantern.position.x }, 8000)
+      .easing(easing)
+      .onUpdate(() => {
+        this.camera.lookAt(this.selectedLantern.position);
+      })
+      .onComplete(() => {
+        this.cameraFocused = true;
+        // this.camera.rotation.x += this.toRadians(5);
+        setTimeout(() => {
+          console.log('hi');
+          this.selectedLantern = "";
+          new TWEEN.Tween(this.camera.rotation)
+            .to({ x: 0, y: 0, z: 0 }, 6000)
+            .easing(easing)
+            .start();
+          new TWEEN.Tween(this.camera.position)
+            .to({ x: 0, y: 0.5, z: 9 }, 6000)
+            .easing(easing)
+            .onComplete(() => {
+              setTimeout(this.pickLantern, 30000);
+            })
+            .start();
+        }, 15000);
+      })
+      .start();
   };
 
   initThreeScene = () => {
@@ -119,6 +118,7 @@ class MainView extends Component {
     this.THREE = THREE;
     this.cameraFocused = false;
     this.selectedCube = '';
+    this.font = '';
 
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -134,15 +134,19 @@ class MainView extends Component {
     this.renderer.setSize(width, height);
     this.mount.appendChild(this.renderer.domElement);
 
-    this.logo = THREE.ImageUtils.loadTexture('/assets/images/mark-conference-logo-black.png');
     this.material = new THREE.MeshStandardMaterial({
-      // map: this.logo,
       opacity: 1,
       roughness: 0.5,
       transparent: false,
       metalness: 0,
       emissive: '#C9AF5B',
       emissiveIntensity: 0.2
+    });
+
+    const fontLoader = new THREE.FontLoader();
+    fontLoader.load('/assets/fonts/Quicksand Medium_Regular.json', font => {
+      console.log(font);
+      this.font = font;
     });
 
     this.model = new this.THREE.OBJLoader().load('/assets/models/lantern.obj', object => {
@@ -153,11 +157,10 @@ class MainView extends Component {
 
       this.mesh = object;
       this.mesh.scale.set(0.02, 0.02, 0.02);
-      this.createLantern({ name: 'one' });
-      this.createLantern({ name: 'two' });
-      this.createLantern({ name: 'three' });
+      // this.createLantern({ name: 'one' });
+      // this.createLantern({ name: 'two' });
+      // this.createLantern({ name: 'three' });
       setTimeout(this.pickLantern, 20000);
-
     });
 
     // for perspective
@@ -179,7 +182,6 @@ class MainView extends Component {
     const axesHelper = new THREE.AxesHelper(5);
     this.scene.add(axesHelper);
 
-
     this.start();
   };
 
@@ -188,11 +190,12 @@ class MainView extends Component {
 
   // create new lantern
   createLantern = lanternInfo => {
+    console.log(lanternInfo);
     const parent = new THREE.Group();
     parent.name = lanternInfo.name;
     this.scene.add(parent);
     const lantern = this.mesh.clone();
-    lantern.position.set(random.range(-5, 5), -8, random.range(0, 4));
+    parent.position.set(random.range(-5, 5), -8, random.range(0, 4));
     lantern.castShadow = true;
     lantern.receiveShadow = true;
 
@@ -202,27 +205,27 @@ class MainView extends Component {
         'Carles beard Echo Park tote bag bitters twee tousled single-origin coffee pickled letterpress chillwave PBR&B Tumblr swag ennui'
     };
 
-    lantern.originalPosition = lantern.position.clone();
+    parent.originalPosition = parent.position.clone();
 
     const name = new SpriteText2D(parent.userData.user, {
-        align: textAlign.center,
-        font: '35px Arial',
-        fillStyle: 'rgba(255,255,255,0.85)',
-        antialias: true
-      });
-      name.scale.set(0.015, 0.015, 0.015);
-      name.material.alphaTest = 0.1;
+      align: textAlign.center,
+      font: `13px ${this.font}`,
+      fillStyle: 'rgba(255,255,255,0.85)',
+      antialias: true
+    });
+    name.scale.set(0.015, 0.015, 0.015);
+    name.material.alphaTest = 0.1;
 
-      parent.add(name);
+    parent.add(name);
 
-    const position = lantern.position;
-    this.target = { x: lantern.position.x, y: 30, z: lantern.position.z };
-    const tween = new TWEEN.Tween(position).to(this.target, random.rangeFloor(80000, 100000));
+    const position = parent.position;
+    this.target = { x: parent.position.x, y: 30, z: parent.position.z };
+    const tween = new TWEEN.Tween(position).to(this.target, 100000);
 
     const zRotation = this.toRadians(random.range(5, 25));
     const tweenTimer = random.rangeFloor(4000, 10000);
     const tween2 = new TWEEN.Tween(lantern.rotation)
-      .to({ z: '-' + zRotation }, tweenTimer)
+      .to({ z: `-${zRotation}` }, tweenTimer)
       .easing(TWEEN.Easing.Quintic.InOut);
 
     const tween3 = new TWEEN.Tween(lantern.rotation)
@@ -232,13 +235,13 @@ class MainView extends Component {
     tween2.chain(tween3);
     tween3.chain(tween2);
 
-    const randomNum = Math.random();
+    // const randomNum = Math.random();
     tween.onUpdate(function() {
       lantern.rotation.x += 0.0008;
       lantern.rotation.y += 0.005;
-      if (lantern.position.y >= 30) {
+      /* if (lantern.position.y >= 30) {
         lantern.position.y = -10;
-      }
+      } */
     });
 
     tween.repeat(Infinity);
@@ -273,6 +276,8 @@ class MainView extends Component {
     if (this.selectedLantern) {
       if (this.cameraFocused) {
         this.camera.lookAt(this.selectedLantern.position);
+        this.camera.rotation.x += 0.01;
+        // this.camera.position.x += .02;
       }
       if (this.selectedLantern.position.y >= this.camera.position.y) {
         this.camera.position.y = this.selectedLantern.position.y;
