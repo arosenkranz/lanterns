@@ -239,11 +239,13 @@ class MainView extends Component {
     this.frameId = window.requestAnimationFrame(this.animate);
     TWEEN.update();
     if (this.selectedLantern) {
-      if (this.cameraFocused) {
+      if (this.cameraFocused && (this.selectedLantern.position.y >= this.camera.position.y)) {
         this.camera.lookAt(this.selectedLantern.position);
         // this.camera.rotation.x += 0.02;
         // this.camera.position.x += .02;
         this.camera.position.y = this.selectedLantern.position.y;
+      } else if (this.cameraFocused) {
+        this.camera.lookAt(this.selectedLantern.position);
       }
       if (this.selectedLantern.position.y >= this.camera.position.y) {
         /*  const cameraOffset = this.relativeCameraOffset.applyMatrix4(this.selectedLantern.matrixWorld);
