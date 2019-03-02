@@ -206,8 +206,7 @@ class SendLantern extends Component {
                 <span style={{ color: 'red' }}>R</span>K
               </h2>
               <p className="text-center">
-                Submit a message of hope, inspiration, or observation to light your lantern. Login with Google or
-                Facebook to continue.
+                Submit a message of hope, inspiration, or observation to light your lantern.
               </p>
 
               <form className="w-100" onSubmit={handleFormSubmit}>
