@@ -20,7 +20,7 @@ router.get('/check', (req, res) => {
 // match /api/auth/callback
 router.get(
   '/callback',
-  passport.authenticate('auth0', /* { failureRedirect: '/send' } */),
+  passport.authenticate('auth0', { failureRedirect: '/send' }),
   async (req, res) => {
     if (!req.user) {
       throw new Error('user null');
