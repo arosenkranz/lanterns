@@ -159,10 +159,12 @@ class MainView extends Component {
     const parent = new THREE.Group();
     parent.name = lanternInfo.displayName;
     console.log(lanternInfo.message);
-    lanternInfo.message = emojiStrip(lanternInfo.message);
-    lanternInfo.displayName = emojiStrip(lanternInfo.displayName);
-    console.log(lanternInfo.message);
-    parent.userData = lanternInfo;
+    const lanternData = {
+      message: emojiStrip(lanternInfo.message).trim(),
+      displayName: emojiStrip(lanternInfo.displayName).trim()
+    }
+    parent.userData = lanternData;
+    console.log(parent.userData);
     parent.originalPosition = parent.position.clone();
     this.scene.add(parent);
 
