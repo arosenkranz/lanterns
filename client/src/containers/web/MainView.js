@@ -8,6 +8,7 @@ import * as TWEEN from '@tweenjs/tween.js';
 import random from 'canvas-sketch-util/random';
 // import { lerp, pingPong, inverseLerp } from 'canvas-sketch-util/math';
 import * as OBJLoader from 'three-obj-loader';
+import emojiStrip from 'emoji-strip';
 OBJLoader(THREE);
 
 // const OrbitControls = require('three-orbit-controls')(THREE);
@@ -135,8 +136,9 @@ class MainView extends Component {
     const ambientlight = new THREE.AmbientLight(0x404040);
     this.scene.add(ambientlight);
 
-    const spotLight = new THREE.SpotLight();
-    spotLight.position.set(0, 80, 30);
+    const spotLight = new THREE.SpotLight('#fffae5');
+    // spotLight.color = "#D8D1AC";
+    spotLight.position.set(-2, 65, 25);
     spotLight.castShadow = true;
     this.scene.add(spotLight);
 
@@ -156,12 +158,16 @@ class MainView extends Component {
 
     const parent = new THREE.Group();
     parent.name = lanternInfo.displayName;
+    console.log(lanternInfo.message);
+    lanternInfo.message = emojiStrip(lanternInfo.message);
+    lanternInfo.displayName = emojiStrip(lanternInfo.displayName);
+    console.log(lanternInfo.message);
     parent.userData = lanternInfo;
     parent.originalPosition = parent.position.clone();
     this.scene.add(parent);
 
     const lantern = this.mesh.clone();
-    parent.position.set(random.range(-2.5, 2.5), -8, random.range(2, 7));
+    parent.position.set(random.range(-2.75, 2.75), -8, random.range(2, 7));
     lantern.castShadow = true;
     lantern.receiveShadow = true;
 
@@ -169,7 +175,6 @@ class MainView extends Component {
     this.target = { x: parent.position.x, y: 25, z: parent.position.z };
     const tween = new TWEEN.Tween(position).to(this.target, random.range(100000, 150000));
 
-    const zRotation = this.toRadians(random.range(0, 13));
     const tweenTimer = random.rangeFloor(4000, 10000);
     const tween2 = new TWEEN.Tween(lantern.rotation).to({ z: -0.1 }, tweenTimer).easing(TWEEN.Easing.Quintic.InOut);
 
@@ -209,7 +214,6 @@ class MainView extends Component {
     this.frameId = window.requestAnimationFrame(this.animate);
     TWEEN.update();
     if (this.selectedLantern) {
-
       if (this.selectedLantern.position.y >= this.camera.position.y) {
         // this.camera.lookAt(this.selectedLantern.position);
         // this.camera.rotation.x += 0.02;
@@ -218,7 +222,6 @@ class MainView extends Component {
       }
       if (this.cameraFocused) {
         this.camera.lookAt(this.selectedLantern.position);
-
       }
     }
   };
@@ -238,7 +241,6 @@ class MainView extends Component {
 
     let lanternName = this.meshes[Math.floor(Math.random() * this.meshes.length)];
     this.selectedLantern = this.scene.getObjectByName(lanternName);
-    console.log(this.selectedLantern.position);
     if (!this.selectedLantern || this.selectedLantern.position.y >= 10) {
       this.selectedLantern = '';
       clearInterval(this.interval);
@@ -295,7 +297,7 @@ class MainView extends Component {
         {
           z: this.selectedLantern.position.z + 2.6,
           x: this.selectedLantern.position.x,
-          y: this.selectedLantern.position.y + .5
+          y: this.selectedLantern.position.y + 0.5
         },
         8000
       )

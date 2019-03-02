@@ -219,6 +219,7 @@ form small {
   z-index: 9999;
   color: var(--tan);
   padding: 10px;
+  margin-top: 15px;
   text-align: center;
   width: 100%;
 }
