@@ -4,8 +4,12 @@ const apiRoutes = require('./api');
 
 router.use('/api', apiRoutes);
 
-router.use((req, res) => {
+router.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/build'));
 });
+
+// router.use((req, res) => {
+//   res.sendFile(path.join(__dirname, '../client/build'));
+// });
 
 module.exports = router;

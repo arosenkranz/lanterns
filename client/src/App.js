@@ -12,7 +12,14 @@ const App = () => {
           <Route exact path="/" component={MainView} />
           <Route exact path="/view" component={ViewLanterns} />
           <Route exact path="/send" component={SendLantern} />
-          <Route exact path='/sign-in' component={() => { window.location = 'http://localhost:3001/api/auth'; return null; }} />
+          <Route
+            exact
+            path="/sign-in"
+            component={() => {
+              window.location = process.env.SIGNIN;
+              return null;
+            }}
+          />
           <Route component={MainView} />
         </Switch>
       </div>

@@ -45,7 +45,11 @@ class SendLantern extends Component {
   };
 
   handleInputChange = event => {
-    const { name, value } = event.target;
+    let { name, value } = event.target;
+
+    if (value.length > 140) {
+      value = value.substring(0, 140);
+    }
 
     this.setState({
       [name]: value
@@ -209,7 +213,7 @@ class SendLantern extends Component {
                   name="message"
                   placeholder="Message Here"
                 />
-
+                <small>{message.length} / 140 Characters</small>
                 <button className="submit-btn" onClick={handleFormSubmit}>
                   Send
                 </button>
