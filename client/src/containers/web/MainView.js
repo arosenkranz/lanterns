@@ -1,9 +1,9 @@
 import React, { Component, Fragment } from 'react';
 import { Redirect } from 'react-router-dom';
-import API, { getLanterns, promiseHandler } from '../../utils/API';
+import API from '../../utils/API';
 import io from 'socket.io-client';
 import * as THREE from 'three';
-import { SpriteText2D, textAlign } from 'three-text2d';
+// import { SpriteText2D, textAlign } from 'three-text2d';
 import * as TWEEN from '@tweenjs/tween.js';
 import random from 'canvas-sketch-util/random';
 // import { lerp, pingPong, inverseLerp } from 'canvas-sketch-util/math';
@@ -45,9 +45,10 @@ class MainView extends Component {
 
   mobileCheck = () => {
     if (/Mobi|Android/i.test(navigator.userAgent)) {
-      this.setState({
+      return window.location.replace('/send');
+      /* this.setState({
         isMobile: true
-      });
+      }); */
     }
   };
 

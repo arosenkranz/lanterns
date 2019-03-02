@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { Redirect } from 'react-router-dom';
-import { createLantern, checkLogin, promiseHandler } from '../../utils/API';
+import { createLantern, promiseHandler } from '../../utils/API';
 import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 
