@@ -166,10 +166,26 @@ p {
   margin-right: auto;
 }
 
+.form-input {
+  font-size: 20px;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 700;
+  color: #000;
+  width: 100%;
+  padding: 7px;
+  border: none;
+  outline: none;
+  min-height: 75px;
+  margin: 0;
+  margin-bottom: 5px;
+  background-color: var(--orange);
+}
+
 .text-input {
   font-size: 20px;
   font-family: 'Quicksand', sans-serif;
-  color: #222;
+  color:#000;
+  font-weight: 700;
   width: 100%;
   padding: 7px;
   border: none;
@@ -177,6 +193,11 @@ p {
   min-height: 150px;
   background-color: var(--orange);
   margin: 0;
+}
+
+form small {
+  color: var(--tan);
+  font-size: 16px;
 }
 
 .submit-btn {

@@ -87,7 +87,6 @@ class MainView extends Component {
     this.renderer.setSize(width, height);
     this.mount.appendChild(this.renderer.domElement);
 
-    this.textMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     const texture = new THREE.TextureLoader().load('/assets/models/paper.png');
 
     this.material = new THREE.MeshStandardMaterial({
@@ -96,7 +95,7 @@ class MainView extends Component {
       roughness: 0.5,
       transparent: false,
       metalness: 0,
-      emissive: '#C9AF5B',
+      emissive: '#D8D1AC',
       emissiveIntensity: 0.2
     });
 
@@ -106,7 +105,6 @@ class MainView extends Component {
       this.font = font;
     });
 
-
     this.model = new this.THREE.OBJLoader().load('/assets/models/lantern.obj', object => {
       // For any meshes in the model, add our material.
       object.traverse(node => {
@@ -114,17 +112,22 @@ class MainView extends Component {
       });
 
       this.mesh = object;
-      this.mesh.scale.set(0.02, 0.02, 0.02);
-      // this.createLantern({ name: 'one' });
-      // this.createLantern({ name: 'two' });
-      // this.createLantern({ name: 'three' });
-      this.interval = setInterval(this.pickLantern, 60000);
+      this.mesh.scale.set(0.035, 0.035, 0.035);
+      this.mesh.translateY(-0.4);
+
+      fontLoader.load('/assets/fonts/Quicksand_Medium_Regular.json', font => {
+        console.log(font);
+        this.font = font;
+        this.loadLanterns();
+
+        this.interval = setInterval(this.pickLantern, 60000);
+      });
     });
 
     // for perspective
-    this.scene.add(new THREE.GridHelper(15, 20));
+    // this.scene.add(new THREE.GridHelper(15, 20));
 
- /*    const light = new THREE.DirectionalLight('red', 1);
+    /*    const light = new THREE.DirectionalLight('red', 1);
     light.position.set(2, 0, 2);
     this.scene.add(light); */
 
@@ -141,7 +144,6 @@ class MainView extends Component {
     // this.scene.add(axesHelper);
 
     this.start();
-    this.loadLanterns();
   };
 
   toRadians = angle => angle * (Math.PI / 180);
@@ -157,19 +159,33 @@ class MainView extends Component {
     this.scene.add(parent);
 
     const lantern = this.mesh.clone();
-    parent.position.set(random.range(-5, 5), -8, random.range(0, 4));
+    parent.position.set(random.range(-2.5, 2.5), -8, random.range(2, 7));
     lantern.castShadow = true;
     lantern.receiveShadow = true;
 
-    const message = `${lanternInfo.message}
-@${lanternInfo.displayName}`;
+    let spacesCount = 0;
+    const messageArray = lanternInfo.message.split('');
+    for (let i = 0; i < messageArray.length; i++) {
+      if (messageArray[i] === ' ') {
+        spacesCount++;
+        if (spacesCount % 6 === 0) {
+          messageArray[i] = '\n';
+        }
+      }
+    }
 
+
+    const message = `${messageArray.join('')}
+@${lanternInfo.displayName}`;
+    console.log(message);
     const textGeometry = new THREE.TextGeometry(message, {
       font: this.font,
       size: 9,
-      height: 1
+      height: 1.5
     });
-    const textMesh = new THREE.Mesh(textGeometry, this.textMaterial);
+    const textMaterial = new THREE.MeshBasicMaterial({ color: '#D8D1AC' });
+
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
     textMesh.scale.set(0.007, 0.007, 0.007);
     textMesh.translateX(0.25);
     textMesh.translateY(0.1);
@@ -179,21 +195,23 @@ class MainView extends Component {
     parent.add(textMesh);
 
     const position = parent.position;
-    this.target = { x: parent.position.x, y: 30, z: parent.position.z };
-    const tween = new TWEEN.Tween(position).to(this.target, random.range(80000, 120000));
+    this.target = { x: parent.position.x, y: 25, z: parent.position.z };
+    const tween = new TWEEN.Tween(position).to(this.target, random.range(100000, 150000));
 
     const zRotation = this.toRadians(random.range(0, 13));
     const tweenTimer = random.rangeFloor(4000, 10000);
-    const tween2 = new TWEEN.Tween(lantern.rotation).to({ z: -0.08 }, tweenTimer).easing(TWEEN.Easing.Quintic.InOut);
+    const tween2 = new TWEEN.Tween(lantern.rotation).to({ z: -0.1 }, tweenTimer).easing(TWEEN.Easing.Quintic.InOut);
 
-    const tween3 = new TWEEN.Tween(lantern.rotation).to({ z: 0.08 }, tweenTimer).easing(TWEEN.Easing.Quintic.InOut);
+    const tween3 = new TWEEN.Tween(lantern.rotation).to({ z: 0.1 }, tweenTimer).easing(TWEEN.Easing.Quintic.InOut);
 
     tween2.chain(tween3);
     tween3.chain(tween2);
 
+    const rotationX = random.range(-0.01, 0.01);
+
     tween.onUpdate(function() {
       // lantern.rotation.x += 0.0008;
-      lantern.rotation.y += 0.009;
+      lantern.rotation.y += rotationX;
     });
 
     tween.repeat(Infinity);
@@ -269,29 +287,26 @@ class MainView extends Component {
     const setRotation = new TWEEN.Tween(this.camera.rotation).to({ x: 0, y: 0, z: 0 }, 6000).easing(easing);
     const setPosition = new TWEEN.Tween(this.camera.position).to({ x: 0, y: 0.5, z: 9 }, 6000).easing(easing);
 
-
     this.selectedLantern.children[0].material.opacity = 1;
     // new TWEEN.Tween(this.selectedLantern.children[0].material.opacity).to(1, 1500).start();
+    this.cameraFocused = true;
 
     new TWEEN.Tween(this.camera.position)
       .to(
         {
           z: this.selectedLantern.position.z + 2.5,
           x: this.selectedLantern.position.x,
-          y: this.selectedLantern.position.y + 10
+          y: this.selectedLantern.position.y + 1
         },
         8000
       )
       .easing(easing)
-      .onUpdate(() => {
-        // this.camera.lookAt(this.selectedLantern.position);
-      })
       .onComplete(() => {
-        this.cameraFocused = true;
         // new TWEEN.Tween(this.camera.rotation.x).to(this.camera.rotation.x + 3, 1000).start();
         setTimeout(() => {
           setPosition.start();
           setRotation.start();
+          this.cameraFocused = false;
           this.selectedLantern.children[0].material.opacity = 0;
 
           // new TWEEN.Tween(this.selectedLantern.children[0].material.opacity).to(0, 1500).start();
@@ -304,18 +319,18 @@ class MainView extends Component {
   };
 
   loadLanterns = () => {
-    console.log('hi');
     API.getLanterns()
       .then(res => {
         console.log(res.data);
+        const shuffledLanterns = res.data.sort(() => 0.5 - Math.random());
         let i = 0;
         let intervalId = setInterval(() => {
-          if (res.data.length === i) {
+          if (shuffledLanterns.length === i) {
             return clearInterval(intervalId);
           }
-          this.createLantern(res.data[i]);
+          this.createLantern(shuffledLanterns[i]);
           i++;
-        });
+        }, 5000);
       })
       .catch(err => console.log(err));
   };
@@ -335,7 +350,7 @@ class MainView extends Component {
         />
         <h2 className="header-CTA">
           Submit a message of hope, inspiration, or observation to light your lantern <br />
-          <small>Go to lanterns.tv</small>{' '}
+          <small>Go to lanterns.tv on your phone</small>
         </h2>
       </Fragment>
     );

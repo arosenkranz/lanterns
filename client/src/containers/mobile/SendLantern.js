@@ -17,11 +17,13 @@ class SendLantern extends Component {
   };
 
   componentDidMount() {
-    // if (!/Mobi|Android/i.test(navigator.userAgent)) {
-    //   return this.setState({
-    //     isMobile: false
-    //   });
-    // }
+    this.initThreeScene();
+
+    if (!/Mobi|Android/i.test(navigator.userAgent)) {
+      return this.setState({
+        isMobile: false
+      });
+    }
     checkLogin().then(({ data }) => {
       console.log(data);
       if (data.status) {
@@ -34,16 +36,12 @@ class SendLantern extends Component {
         });
       }
     });
-    this.initThreeScene();
   }
 
-  checkPage = () => {
-    if (!this.state.isMobile) {
-      return <Redirect to="/" />;
-    } else if (!this.state.isLoggedIn) {
-      return <Redirect to="/sign-in" />;
-    }
-  };
+  componentWillUnmount() {
+    this.stop();
+    this.mount.removeChild(this.renderer.domElement);
+  }
 
   handleInputChange = event => {
     let { name, value } = event.target;
@@ -59,13 +57,13 @@ class SendLantern extends Component {
 
   handleFormSubmit = async event => {
     event.preventDefault();
-
-    if (!this.state.message) {
+    if (!this.state.message || !this.state.displayName) {
       return false;
     }
-
-    const [err, lanternResult] = await promiseHandler(createLantern({ message: this.state.message, displayName: this.state.displayName }));
-
+    
+    const [err, lanternResult] = await promiseHandler(
+      createLantern({ message: this.state.message, displayName: this.state.displayName })
+    );
     if (err) {
       console.log(err);
       return false;
@@ -76,7 +74,7 @@ class SendLantern extends Component {
         success: false
       });
     }
-    
+
     this.setState({ success: true });
     console.log(this.mesh);
     new TWEEN.Tween(this.mesh.position)
@@ -96,7 +94,7 @@ class SendLantern extends Component {
     this.selectedCube = '';
 
     const width = window.innerWidth;
-    const height = window.innerHeight / 2;
+    const height = window.innerHeight * .4;
     //ADD SCENE
     this.scene = new this.THREE.Scene();
 
@@ -109,7 +107,10 @@ class SendLantern extends Component {
     this.renderer.setSize(width, height);
     this.mount.appendChild(this.renderer.domElement);
 
+    const texture = new THREE.TextureLoader().load('/assets/models/paper.png');
+
     this.material = new THREE.MeshStandardMaterial({
+      map: texture,
       opacity: 1,
       roughness: 0.5,
       transparent: false,
@@ -117,22 +118,25 @@ class SendLantern extends Component {
       emissive: '#C9AF5B',
       emissiveIntensity: 0.2
     });
-    console.log('hi');
+    console.log(this.material);
+
     this.model = new this.THREE.OBJLoader().load('/assets/models/lantern.obj', object => {
       // For any meshes in the model, add our material.
+      console.log(object);
       object.traverse(node => {
         if (node.isMesh) node.material = this.material;
       });
+      console.log(object);
       this.mesh = object;
-      this.mesh.scale.set(0.035, 0.035, 0.035);
-      this.mesh.position.set(0, -0.25, 0);
+      this.mesh.scale.set(0.045, 0.045, 0.045);
+      this.mesh.position.set(0, -0.35, 0);
       console.log(this.mesh);
       this.scene.add(this.mesh);
     });
 
-    const light = new THREE.DirectionalLight('red', 1);
-    light.position.set(2, 0, 2);
-    this.scene.add(light);
+    // const light = new THREE.DirectionalLight('red', 1);
+    // light.position.set(2, 0, 2);
+    // this.scene.add(light);
 
     const ambientlight = new THREE.AmbientLight(0x404040);
     this.scene.add(ambientlight);
@@ -169,11 +173,11 @@ class SendLantern extends Component {
   };
 
   render() {
-    // if (!this.state.isMobile) {
-    //   return <Redirect to="/" />;
-    // } else if (!this.state.isLoggedIn) {
-    //   return <Redirect to="/sign-in" />;
-    // }
+    if (!this.state.isMobile) {
+      return <Redirect to="/" />;
+    } else if (!this.state.isLoggedIn) {
+      return <Redirect to="/sign-in" />;
+    }
 
     const {
       state: { message, displayName },
@@ -192,13 +196,13 @@ class SendLantern extends Component {
         <div className="header-section">
           {this.state.success ? (
             <h2 className="text-center text-light">
-              Thank you for leaving your MARK, {this.state.userData.displayName}! Your lantern will be featured on our
+              Thank you for leaving your MARK, {this.state.displayName}! Your lantern will be featured on our
               screen soon!
             </h2>
           ) : (
             <Fragment>
               <h2 className="text-center text-light">
-                {this.state.userData.displayName}, Leave Your MA
+                Leave Your MA
                 <span style={{ color: 'red' }}>R</span>K
               </h2>
               <p className="text-center">
@@ -207,7 +211,13 @@ class SendLantern extends Component {
               </p>
 
               <form className="w-100" onSubmit={handleFormSubmit}>
-                <input className="form-input" value={displayName} onChange={handleInputChange} name="displayName" placeholder="Name"/> 
+                <input
+                  className="form-input"
+                  value={displayName}
+                  onChange={handleInputChange}
+                  name="displayName"
+                  placeholder="Name"
+                />
                 <textarea
                   className="text-input"
                   value={message}
