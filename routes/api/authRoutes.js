@@ -2,6 +2,7 @@ const router = require('express').Router();
 const passport = require('../../utils/middleware/passport-auth');
 const db = require('../../models');
 const promiseHandler = require('../../utils/promiseHandler');
+require('dotenv').config();
 
 // match /api/auth
 router.get('/', passport.authenticate('auth0'), (req, res) => {
@@ -52,10 +53,8 @@ router.get(
       console.log(err);
     }
     console.log(dbUser);
-    if (process.env.NODE_ENV === 'production') {
-      return res.redirect('https://lanterns-tv.herokuapp.com/send')
-    }
-    res.redirect('http://localhost:3000/send');
+    
+    res.redirect(process.env.REDIRECTURI);
   },
 );
 
