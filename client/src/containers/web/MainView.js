@@ -78,7 +78,7 @@ class MainView extends Component {
     //ADD SCENE
     this.scene = new this.THREE.Scene();
 
-    this.camera = new this.THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    this.camera = new this.THREE.PerspectiveCamera(55, width / height, 0.1, 1000);
     this.camera.position.set(0, 0.5, 8);
     this.camera.lookAt(this.scene.position);
 
