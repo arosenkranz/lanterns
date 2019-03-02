@@ -24,7 +24,7 @@ class SendLantern extends Component {
         isMobile: false
       });
     }
-    checkLogin().then(({ data }) => {
+    /* checkLogin().then(({ data }) => {
       console.log(data);
       if (data.status) {
         this.setState({
@@ -35,7 +35,7 @@ class SendLantern extends Component {
           isLoggedIn: false
         });
       }
-    });
+    }); */
   }
 
   componentWillUnmount() {
@@ -175,10 +175,10 @@ class SendLantern extends Component {
   render() {
     if (!this.state.isMobile) {
       return <Redirect to="/" />;
-    } else if (!this.state.isLoggedIn) {
+    } /* else if (!this.state.isLoggedIn) {
       return <Redirect to="/sign-in" />;
     }
-
+ */
     const {
       state: { message, displayName },
       handleFormSubmit,
