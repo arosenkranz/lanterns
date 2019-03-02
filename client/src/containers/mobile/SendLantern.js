@@ -12,7 +12,8 @@ class SendLantern extends Component {
     message: '',
     isLoggedIn: true,
     success: false,
-    userData: {}
+    userData: {},
+    displayName: ''
   };
 
   componentDidMount() {
@@ -63,7 +64,7 @@ class SendLantern extends Component {
       return false;
     }
 
-    const [err, lanternResult] = await promiseHandler(createLantern({ message: this.state.message }));
+    const [err, lanternResult] = await promiseHandler(createLantern({ message: this.state.message, displayName: this.state.displayName }));
 
     if (err) {
       console.log(err);
@@ -168,14 +169,14 @@ class SendLantern extends Component {
   };
 
   render() {
-    if (!this.state.isMobile) {
-      return <Redirect to="/" />;
-    } else if (!this.state.isLoggedIn) {
-      return <Redirect to="/sign-in" />;
-    }
+    // if (!this.state.isMobile) {
+    //   return <Redirect to="/" />;
+    // } else if (!this.state.isLoggedIn) {
+    //   return <Redirect to="/sign-in" />;
+    // }
 
     const {
-      state: { message },
+      state: { message, displayName },
       handleFormSubmit,
       handleInputChange
     } = this;
@@ -206,6 +207,7 @@ class SendLantern extends Component {
               </p>
 
               <form className="w-100" onSubmit={handleFormSubmit}>
+                <input className="form-input" value={displayName} onChange={handleInputChange} name="displayName" placeholder="Name"/> 
                 <textarea
                   className="text-input"
                   value={message}

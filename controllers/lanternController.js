@@ -27,7 +27,7 @@ module.exports = {
     const io = req.app.get('socketio');
 
     const [messageErr, dbMessage] = await promiseHandler(
-      db.Messages.create({ message: req.body.message, displayName: req.user.displayName }),
+      db.Messages.create({ message: req.body.message, displayName: req.body.displayName }),
     );
 
     if (messageErr) {
@@ -37,20 +37,20 @@ module.exports = {
 
     console.log(dbMessage);
 
-    const [userErr, dbUser] = await promiseHandler(
-      db.Users.findOneAndUpdate(
-        { user_id: req.user.user_id },
-        { $push: { messages: dbMessage._id } },
-        { new: true },
-      ),
-    );
+    // const [userErr, dbUser] = await promiseHandler(
+    //   db.Users.findOneAndUpdate(
+    //     { user_id: req.user.user_id },
+    //     { $push: { messages: dbMessage._id } },
+    //     { new: true },
+    //   ),
+    // );
 
-    if (userErr) {
+ /*    if (userErr) {
       console.log(userErr);
       return res.json(userErr);
     }
 
-    console.log(dbUser);
+    console.log(dbUser); */
 
     io.emit('new lantern', dbMessage);
     return res.json(dbMessage);
