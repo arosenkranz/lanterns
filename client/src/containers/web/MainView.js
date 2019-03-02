@@ -156,6 +156,7 @@ class MainView extends Component {
 
     const parent = new THREE.Group();
     parent.name = lanternInfo.displayName;
+    parent.userData = lanternInfo;
     parent.originalPosition = parent.position.clone();
     this.scene.add(parent);
 
@@ -163,37 +164,6 @@ class MainView extends Component {
     parent.position.set(random.range(-2.5, 2.5), -8, random.range(2, 7));
     lantern.castShadow = true;
     lantern.receiveShadow = true;
-
-    let spacesCount = 0;
-    const messageArray = lanternInfo.message.split('');
-    for (let i = 0; i < messageArray.length; i++) {
-      if (messageArray[i] === ' ') {
-        spacesCount++;
-        if (spacesCount % 6 === 0) {
-          messageArray[i] = '\n';
-        }
-      }
-    }
-
-
-    const message = `${messageArray.join('')}
-@${lanternInfo.displayName}`;
-    console.log(message);
-    const textGeometry = new THREE.TextGeometry(message, {
-      font: this.font,
-      size: 9,
-      height: 1.5
-    });
-    const textMaterial = new THREE.MeshBasicMaterial({ color: '#D8D1AC' });
-
-    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-    textMesh.scale.set(0.007, 0.007, 0.007);
-    textMesh.translateX(0.25);
-    textMesh.translateY(0.1);
-    textMesh.material.opacity = 0;
-    textMesh.material.alphaTest = 0.1;
-
-    parent.add(textMesh);
 
     const position = parent.position;
     this.target = { x: parent.position.x, y: 25, z: parent.position.z };
@@ -239,19 +209,16 @@ class MainView extends Component {
     this.frameId = window.requestAnimationFrame(this.animate);
     TWEEN.update();
     if (this.selectedLantern) {
-      if (this.cameraFocused && (this.selectedLantern.position.y >= this.camera.position.y)) {
-        this.camera.lookAt(this.selectedLantern.position);
+
+      if (this.selectedLantern.position.y >= this.camera.position.y) {
+        // this.camera.lookAt(this.selectedLantern.position);
         // this.camera.rotation.x += 0.02;
         // this.camera.position.x += .02;
         this.camera.position.y = this.selectedLantern.position.y;
-      } else if (this.cameraFocused) {
-        this.camera.lookAt(this.selectedLantern.position);
       }
-      if (this.selectedLantern.position.y >= this.camera.position.y) {
-        /*  const cameraOffset = this.relativeCameraOffset.applyMatrix4(this.selectedLantern.matrixWorld);
-        this.camera.position.y = cameraOffset.y; */
-        // this.camera.lookAt(this.selectedLantern.position);
-        // this.camera.rotation.x += 0.02;
+      if (this.cameraFocused) {
+        this.camera.lookAt(this.selectedLantern.position);
+
       }
     }
   };
@@ -279,6 +246,36 @@ class MainView extends Component {
     }
     this.interval = setInterval(() => this.pickLantern, 60000);
 
+    let spacesCount = 0;
+    const messageArray = this.selectedLantern.userData.message.split('');
+    for (let i = 0; i < messageArray.length; i++) {
+      if (messageArray[i] === ' ') {
+        spacesCount++;
+        if (spacesCount % 6 === 0) {
+          messageArray[i] = '\n';
+        }
+      }
+    }
+
+    const message = `${messageArray.join('')}
+@${this.selectedLantern.userData.displayName}`;
+    console.log(message);
+    const textGeometry = new THREE.TextGeometry(message, {
+      font: this.font,
+      size: 9,
+      height: 1.5
+    });
+    const textMaterial = new THREE.MeshBasicMaterial({ color: '#D8D1AC' });
+
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+    textMesh.scale.set(0.007, 0.007, 0.007);
+    textMesh.translateX(0.25);
+    textMesh.translateY(0.1);
+    textMesh.material.opacity = 1;
+    textMesh.material.alphaTest = 0.1;
+
+    this.selectedLantern.add(textMesh);
+
     this.displayLantern();
   };
 
@@ -290,28 +287,28 @@ class MainView extends Component {
     const setRotation = new TWEEN.Tween(this.camera.rotation).to({ x: 0, y: 0, z: 0 }, 6000).easing(easing);
     const setPosition = new TWEEN.Tween(this.camera.position).to({ x: 0, y: 0.5, z: 9 }, 6000).easing(easing);
 
-    this.selectedLantern.children[0].material.opacity = 1;
+    // this.selectedLantern.children[0].material.opacity = 1;
     // new TWEEN.Tween(this.selectedLantern.children[0].material.opacity).to(1, 1500).start();
-    this.cameraFocused = true;
 
     new TWEEN.Tween(this.camera.position)
       .to(
         {
-          z: this.selectedLantern.position.z + 2.5,
+          z: this.selectedLantern.position.z + 2.6,
           x: this.selectedLantern.position.x,
-          y: this.selectedLantern.position.y + 1
+          y: this.selectedLantern.position.y + .5
         },
         8000
       )
       .easing(easing)
       .onComplete(() => {
+        this.cameraFocused = true;
+
         // new TWEEN.Tween(this.camera.rotation.x).to(this.camera.rotation.x + 3, 1000).start();
         setTimeout(() => {
           setPosition.start();
           setRotation.start();
           this.cameraFocused = false;
-          this.selectedLantern.children[0].material.opacity = 0;
-
+          this.selectedLantern.remove(this.selectedLantern.children[1]);
           // new TWEEN.Tween(this.selectedLantern.children[0].material.opacity).to(0, 1500).start();
           this.selectedLantern = '';
 
