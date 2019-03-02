@@ -6,6 +6,7 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const session = require('express-session');
 const logger = require('morgan');
+const path = require('path');
 const mongoose = require('mongoose');
 const passport = require('./utils/middleware/passport-auth');
 require('dotenv').config();
@@ -43,8 +44,10 @@ if (process.env.NODE_ENV === 'production') {
 
 // turn on routes and sockets
 app.use(routes);
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build'));
+});
 require('./utils/sockets')(io);
-
 
 // Connect to the Mongo DB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });

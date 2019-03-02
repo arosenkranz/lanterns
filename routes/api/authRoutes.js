@@ -52,7 +52,10 @@ router.get(
       console.log(err);
     }
     console.log(dbUser);
-    res.redirect(process.env.REDIRECT || 'http://localhost:3000/send');
+    if (process.env.NODE_ENV === 'production') {
+      return res.redirect('https://lanterns-tv.herokuapp.com/send')
+    }
+    res.redirect('http://localhost:3000/send');
   },
 );
 
