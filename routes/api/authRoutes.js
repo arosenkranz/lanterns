@@ -52,7 +52,7 @@ router.get(
       console.log(err);
     }
     console.log(dbUser);
-    res.redirect('http://localhost:3000/send');
+    res.redirect(process.env.REDIRECT || 'http://localhost:3000/send');
   },
 );
 
