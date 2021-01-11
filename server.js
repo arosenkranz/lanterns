@@ -50,10 +50,7 @@ app.get('*', (req, res) => {
 require('./utils/sockets')(io);
 
 // Connect to the Mongo DB
-mongoose.connect(
-  'mongodb://heroku_r6mxhzjq:iq7ucbjtqbs4mq62duhghlh17c@ds157735.mlab.com:57735/heroku_r6mxhzjq',
-  { useNewUrlParser: true },
-);
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 
 // turn on server
 http.listen(PORT, () => console.log(`connected on http://localhost:${PORT}`));
